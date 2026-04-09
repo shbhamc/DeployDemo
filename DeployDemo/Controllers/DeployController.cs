@@ -3,11 +3,15 @@ using DeployDemo.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Identity.Web.Resource;
 using System;
+using System.Text.Json;
 
 namespace DeployDemo.Controllers
 {
     [Route("api/[controller]")]
+    [RequiredScope("Scope.Any")]
     [ApiController]
     [Authorize]   
     public class DeployController(
@@ -16,7 +20,8 @@ namespace DeployDemo.Controllers
         ILoggerFactory loggerFactory,
         JwtService jwtService,
         HttpClient httpClient,
-        IConfiguration config) : ControllerBase
+        IConfiguration config,
+        IDistributedCache cache) : ControllerBase
     {
         private readonly DeployDemoContext _context = context;
         private readonly BlobService _blobService = blobService;
@@ -24,27 +29,28 @@ namespace DeployDemo.Controllers
         private readonly JwtService _jwtService = jwtService;
         private readonly HttpClient _httpClient = httpClient;
         private readonly IConfiguration _config = config;
+        private readonly IDistributedCache _cache = cache;
 
         // LOGIN
-        [HttpPost("login")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginDTO model)
-        {
-            _logger.LogInformation("Login attempt for user {Username}", model.username);
+        //[HttpPost("login")]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> Login(LoginDTO model)
+        //{
+        //    _logger.LogInformation("Login attempt for user {Username}", model.username);
 
-            if (model.username == "admin" && model.password == "123")
-            {
-                var token = _jwtService.GenerateToken(model.username);
+        //    if (model.username == "admin" && model.password == "123")
+        //    {
+        //        var token = _jwtService.GenerateToken(model.username);
 
-                _logger.LogInformation("Login successful for user {Username}", model.username);
+        //        _logger.LogInformation("Login successful for user {Username}", model.username);
 
-                return Ok(new { Token = token });
-            }
+        //        return Ok(new { Token = token });
+        //    }
 
-            _logger.LogWarning("Invalid login attempt for user {Username}", model.username);
+        //    _logger.LogWarning("Invalid login attempt for user {Username}", model.username);
 
-            return Unauthorized();
-        }
+        //    return Unauthorized();
+        //}
 
         // External API call
         [HttpGet("profile-validate")]
@@ -88,10 +94,32 @@ namespace DeployDemo.Controllers
         public async Task<IActionResult> GetAll()
         {
             _logger.LogInformation("Fetching all DeployDemo records");
+            string cacheKey = $"GetAll";
+
+            var cachedData = await _cache.GetStringAsync(cacheKey);
+
+            if (!string.IsNullOrEmpty(cachedData))
+            {
+                var cData = JsonSerializer.Deserialize<List<DeployDTO>>(cachedData);
+                _logger.LogInformation("Total records fetched from cache: {Count}", cData.Count);
+
+                return Ok(cData);
+            }
 
             var data = await _context.DeployDemos.ToListAsync();
+                         
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            };
 
-            _logger.LogInformation("Total records fetched: {Count}", data.Count);
+            await _cache.SetStringAsync(
+                cacheKey,
+                JsonSerializer.Serialize(data),
+                options
+            );
+             
+            _logger.LogInformation("Total records fetched from db: {Count}", data.Count);
 
             return Ok(data);
         }
