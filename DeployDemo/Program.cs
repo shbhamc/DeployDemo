@@ -67,11 +67,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    };
 //});
 
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration["RedisCacheSettings:ConnectionString"];
-    options.InstanceName = "deploydemo.redis";
-});
+//builder.Services.AddStackExchangeRedisCache(options =>
+//{
+//    options.Configuration = builder.Configuration["RedisCacheSettings:ConnectionString"];
+//    options.InstanceName = "deploydemo.redis";
+//});
 
 builder.Services.AddSwaggerGen(options =>
 {

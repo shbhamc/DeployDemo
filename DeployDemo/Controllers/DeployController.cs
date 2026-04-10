@@ -17,19 +17,15 @@ namespace DeployDemo.Controllers
     public class DeployController(
         DeployDemoContext context,
         BlobService blobService,
-        ILoggerFactory loggerFactory,
-        JwtService jwtService,
+        ILoggerFactory loggerFactory, 
         HttpClient httpClient,
-        IConfiguration config,
-        IDistributedCache cache) : ControllerBase
+        IConfiguration config ) : ControllerBase
     {
         private readonly DeployDemoContext _context = context;
         private readonly BlobService _blobService = blobService;
-        private readonly ILogger _logger = loggerFactory.CreateLogger<DeployController>();
-        private readonly JwtService _jwtService = jwtService;
+        private readonly ILogger _logger = loggerFactory.CreateLogger<DeployController>(); 
         private readonly HttpClient _httpClient = httpClient;
-        private readonly IConfiguration _config = config;
-        private readonly IDistributedCache _cache = cache;
+        private readonly IConfiguration _config = config; 
 
         // LOGIN
         //[HttpPost("login")]
@@ -94,30 +90,30 @@ namespace DeployDemo.Controllers
         public async Task<IActionResult> GetAll()
         {
             _logger.LogInformation("Fetching all DeployDemo records");
-            string cacheKey = $"GetAll";
+            //string cacheKey = $"GetAll";
 
-            var cachedData = await _cache.GetStringAsync(cacheKey);
+            //var cachedData = await _cache.GetStringAsync(cacheKey);
 
-            if (!string.IsNullOrEmpty(cachedData))
-            {
-                var cData = JsonSerializer.Deserialize<List<DeployDTO>>(cachedData);
-                _logger.LogInformation("Total records fetched from cache: {Count}", cData.Count);
+            //if (!string.IsNullOrEmpty(cachedData))
+            //{
+            //    var cData = JsonSerializer.Deserialize<List<DeployDTO>>(cachedData);
+            //    _logger.LogInformation("Total records fetched from cache: {Count}", cData.Count);
 
-                return Ok(cData);
-            }
+            //    return Ok(cData);
+            //}
 
             var data = await _context.DeployDemos.ToListAsync();
                          
-            var options = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            };
+            //var options = new DistributedCacheEntryOptions
+            //{
+            //    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            //};
 
-            await _cache.SetStringAsync(
-                cacheKey,
-                JsonSerializer.Serialize(data),
-                options
-            );
+            //await _cache.SetStringAsync(
+            //    cacheKey,
+            //    JsonSerializer.Serialize(data),
+            //    options
+            //);
              
             _logger.LogInformation("Total records fetched from db: {Count}", data.Count);
 
