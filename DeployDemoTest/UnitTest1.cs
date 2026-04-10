@@ -27,8 +27,7 @@ namespace DeployDemoTest
             var controller = new DeployController(
                 context,
                 blobService: null,
-                loggerFactory: LoggerFactory.Create(builder => { }),
-                jwtService: null,
+                loggerFactory: LoggerFactory.Create(builder => { }), 
                 httpClient: new HttpClient(),
                 config: null
             );
