@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace DeployDemoTest
-{
+{  
     public class UnitTest1
     {
         [Fact]
