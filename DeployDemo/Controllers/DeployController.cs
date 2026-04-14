@@ -219,22 +219,12 @@ namespace DeployDemo.Controllers
 
         // FILE UPLOAD
         [AllowAnonymous]
-        [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
+        [HttpGet("test")]
+        public async Task<IActionResult> Test()
         {
-            if (file == null || file.Length == 0)
-            {
-                _logger.LogWarning("Upload attempted with no file");
-                return BadRequest("No file selected");
-            }
-
-            _logger.LogInformation("Uploading file {FileName}", file.FileName);
-
-            var url = await _blobService.UploadAsync(file);
-
-            _logger.LogInformation("File uploaded successfully. Url: {Url}", url);
-
-            return Ok(new { FileUrl = url });
+            _logger.LogInformation("test api call");
+             
+            return Ok(new { test = "test done" });
         }
     }
 }
