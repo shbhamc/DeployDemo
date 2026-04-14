@@ -218,6 +218,7 @@ namespace DeployDemo.Controllers
         }
 
         // FILE UPLOAD
+        [AllowAnonymous]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
